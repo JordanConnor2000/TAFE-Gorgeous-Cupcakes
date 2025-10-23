@@ -1,24 +1,41 @@
 <?php
-	//database connection details
-	$host = 'gorgeous-cupcakes-db.cvdmxjecrfpy.us-east-1.rds.amazonaws.com';
-	$user = 'admin';
-	$password = 'password';
-	$database = 'gorgeous_cupcakes';
+require '/var/www/html/vendor/autoload.php';
 
-	//connect to database with a try/catch statement
-	//if the connection is not successful display the error message via database_error.php
-	//the PDOException class represents the error raised by PDO
-	//the PDO error is stored in the variable $e
-	//the PDO error is returned as a string via the getMessage() function
-	try
-	{
-		$conn = new PDO("mysql:host=$host;dbname=$database", $user, $password);
-	}
-	catch(PDOException $e)
-	{
-		$error_message = $e->getMessage();
-		include('../view/database_error.php');
-		exit();
-	}
+use Aws\SecretsManager\SecretsManagerClient;
+use Aws\Exception\AwsException;
 
+$secretName = 'DatabaseCredentials';
+$region = 'us-east-1';
+
+$client = new SecretsManagerClient([
+    'version' => 'latest',
+    'region' => $region
+]);
+
+try {
+    $result = $client->getSecretValue([
+        'SecretId' => $secretName,
+    ]);
+
+    if (isset($result['SecretString'])) {
+        $secret = json_decode($result['SecretString'], true);
+    } else {
+        $secret = json_decode(base64_decode($result['SecretBinary']), true);
+    }
+
+    $host = $secret['host'];
+    $user = $secret['username'];
+    $password = $secret['password'];
+    $database = $secret['dbname'];
+
+    $conn = new PDO("mysql:host=$host;dbname=$database", $user, $password);
+
+} catch (AwsException $e) {
+    echo "AWS Secrets Manager error: " . $e->getMessage();
+    exit();
+} catch (PDOException $e) {
+    $error_message = $e->getMessage();
+    include('../view/database_error.php');
+    exit();
+}
 ?>
