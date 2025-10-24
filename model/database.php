@@ -2,7 +2,7 @@
 //database connection details
 $host = 'gorgeous-cupcakes-db.cvdmxjecrfpy.us-east-1.rds.amazonaws.com';
 $user = 'admin';
-$password = 'password';
+$password = 'deKdPn2JPxZfjd8h41Ln';
 $database = 'gorgeous_cupcakes';
 
 //connect to database with a try/catch statement
