@@ -4,7 +4,7 @@ require '/var/www/html/vendor/autoload.php';
 use Aws\SecretsManager\SecretsManagerClient;
 use Aws\Exception\AwsException;
 
-$secretName = 'GorgeousCupcakesDBCredentials';
+$secretName = 'GorgeousCupcakesDatabaseCredentials';
 $region = 'us-east-1';
 
 $client = new SecretsManagerClient([
@@ -43,3 +43,4 @@ try {
     exit();
 }
 ?>
+
