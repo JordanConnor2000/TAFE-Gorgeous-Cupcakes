@@ -4,7 +4,7 @@ require '/var/www/html/vendor/autoload.php';
 use Aws\SecretsManager\SecretsManagerClient;
 use Aws\Exception\AwsException;
 
-$secretName = 'DatabaseCredentials';
+$secretName = 'GorgeousCupcakesDBCredentials';
 $region = 'us-east-1';
 
 $client = new SecretsManagerClient([
@@ -13,6 +13,7 @@ $client = new SecretsManagerClient([
 ]);
 
 try {
+    // Retrieve secret from AWS Secrets Manager
     $result = $client->getSecretValue([
         'SecretId' => $secretName,
     ]);
@@ -23,15 +24,18 @@ try {
         $secret = json_decode(base64_decode($result['SecretBinary']), true);
     }
 
+    // Extract credentials
     $host = $secret['host'];
     $user = $secret['username'];
     $password = $secret['password'];
     $database = $secret['dbname'];
 
-    $conn = new PDO("mysql:host=$host;dbname=$database", $user, $password);
+    // Connect to database
+    $conn = new PDO("mysql:host=$host;dbname=$database;charset=utf8mb4", $user, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 } catch (AwsException $e) {
-    echo "AWS Secrets Manager error: " . $e->getMessage();
+    echo "<h3>Secrets Manager Error</h3><p>" . $e->getAwsErrorMessage() . "</p>";
     exit();
 } catch (PDOException $e) {
     $error_message = $e->getMessage();
